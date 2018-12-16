@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="button">
+        <button onclick="loadOriginalImage()">Load</button>
+    </div>
+    <section id="sectionOriginal">
+        <h2>Original</h2>
+        <canvas id="original"></canvas>
+        <div class="button">
+            <button onclick="conversion(0, 0)">Conversion1</button>
+        </div>
+    </section>
+    <section id="sectionConversion1">
+        <h2>Rounding = 0</h2>
+        <canvas id="DirectConversion1" width="400" height="400"></canvas>
+        <canvas id="InvertConversion1" width="400" height="400"></canvas>
+        <canvas id="heatmap1" width="400" height="400"></canvas>
+        <canvas id="legend1"></canvas>
+        <a href="#" id="downloader" onclick="download1()" download="image.png">Download!</a>
+        <div class="button">
+            <button onclick="conversion(1, 10)">Conversion2</button>
+        </div>    
+    </section>
+    <section id="sectionConversion2">
+        <h2>Rounding = 10</h2>
+        <canvas id="DirectConversion2" width="400" height="400"></canvas>
+        <canvas id="InvertConversion2" width="400" height="400"></canvas>
+        <canvas id="heatmap2" width="400" height="400"></canvas>
+        <canvas id="legend2"></canvas>
+        <div class="button">
+            <button onclick="conversion(2, 50)">Conversion3</button>
+        </div>    
+    </section>
+    <section id="sectionConversion2">
+        <h2>Rounding = 50</h2>
+        <canvas id="DirectConversion3" width="400" height="400"></canvas>
+        <canvas id="InvertConversion3" width="400" height="400"></canvas>
+        <canvas id="heatmap3" width="400" height="400"></canvas>
+        <canvas id="legend3"></canvas>    
+    </section>
+</body>
+<script src="script.js"></script>
+</html> 
