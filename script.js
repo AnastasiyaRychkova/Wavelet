@@ -3,40 +3,60 @@ var widthPic = 200,
     heightPic = 400;
 var context = {};
 
-window.onload = function() {
-    var getCtx = function(nameId, num) {
-        context[num] = document.getElementById(nameId).getContext("2d");
-    };
-    pic = new Image();
-    pic.src = "DoctorWho1.png";
-    pic.onload = function() {
-        // ОГРАНИЧЕНИЕ на ШИРИНУ картинки ЗДЕСЬ
-        widthPic = (pic.width < 499) ? pic.width % 2 ? pic.width - 1 // по-тихому меняет размеры изображения,
-                                                     : pic.width     // чтобы они были четными
-                                     : 500;
-        heightPic = pic.height % 2 ? pic.height - 1
-                                   : pic.height;
-        // установка размеров канвас в зависимости от размеров картинки 
-        document.getElementById("original").setAttributeNS(null, "width", widthPic);
-        document.getElementById("original").setAttributeNS(null, "height", heightPic);
-        console.log("123456789");
-    }
+function getCtx(nameId, num) {
+    var elem = document.getElementById(nameId);
+    elem.setAttributeNS(null, "width", widthPic);
+    elem.setAttributeNS(null, "height", heightPic);
 
-    getCtx("original", 0);                 // получение контекста всех канвасов на странице
-    for (var i = 1; i < 4; i++) {
-        getCtx("DirectConversion"+i, (i-1)*3+1);   // канвас, отображающий суммы и разности после квантования
-        getCtx("InvertConversion"+i, (i-1)*3+2);   // обратное преобразование картинки
-        getCtx("heatmap"+i, (i-1)*3+3);            // тепловая карта исходника и сжатногго изображения
-    }
+    context[num] = elem.getContext("2d");
 }
 
-function loadOriginalImage() { // ф-ия по нажатию кнопки загрузки 
-    context[0].drawImage(pic, 0, 0, widthPic, heightPic);
-}
+var loadImageFile = (function () {
+	if (window.FileReader) {
+		var	pic = null, oFReader = new window.FileReader(),
+			rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
 
-function download1(){
-    document.getElementById("downloader").download = "123.png";
-    document.getElementById("downloader").href = document.getElementById("InvertConversion1").toDataURL("image/png").replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+		oFReader.onload = function (oFREvent) {
+			if (!pic) {
+				pic = new Image();
+			}
+            pic.src = oFREvent.target.result;
+            pic.onload = function () {
+                widthPic = (pic.width < 499) ? pic.width % 2 ? pic.width - 1 // по-тихому меняет размеры изображения,
+                                                             : pic.width     // чтобы они были четными
+                                             : 500;
+                heightPic = pic.height;
+
+                // установка размеров канвас в зависимости от размеров картинки 
+                getCtx("original", 0);                 // получение контекста всех канвасов на странице
+                for (var i = 1; i < 4; i++) {
+                    getCtx("DirectConversion" + i, (i - 1) * 3 + 1);   // канвас, отображающий суммы и разности после квантования
+                    getCtx("InvertConversion" + i, (i - 1) * 3 + 2);   // обратное преобразование картинки
+                    getCtx("heatmap" + i, (i - 1) * 3 + 3);            // тепловая карта исходника и сжатногго изображения
+                }
+                context[0].drawImage(pic, 0, 0, widthPic, heightPic);
+            }
+		};
+
+		return function () {
+			var aFiles = document.getElementById("imageInput").files;
+			if (aFiles.length === 0) { return; }
+			if (!rFilter.test(aFiles[0].type)) { alert("You must select a valid image file!"); return; }
+			oFReader.readAsDataURL(aFiles[0]);
+		}
+
+	}
+	if (navigator.appName === "Microsoft Internet Explorer") {
+		return function () {
+			document.getElementById("imagePreview").filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = document.getElementById("imageInput").value;
+
+		}
+    }
+})();
+
+function downloadImg(num){
+    document.getElementById("downloader"+num).download = "123.png";
+    document.getElementById("downloader"+num).href = document.getElementById("InvertConversion"+num).toDataURL("image/png").replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 }
 
 function setPixel(imageData, i, value) { // установка значения value в пиксель, начиная с индекса i
@@ -49,8 +69,8 @@ function compression(quantum, OimgData, DCimgData, ICimgData) { // сжатие 
     var n = OimgData.data.length; // количество ячеек массива с картинкой (кол-во пикселей *4)
     var mass = new Array(n / 4); // массив по кол-ву пикселей картинки
 
-    var halfStrLen = n / widthPic / 2, // половина ширины изовражения *4
-        nStr = n / widthPic; // ширина изображения *4 (+ кол-во обработанных строк * шир. изобр. *4)
+    var halfStrLen = n / heightPic / 2, // половина ширины изовражения *4
+        nStr = n / heightPic; // ширина изображения *4 (+ кол-во обработанных строк * шир. изобр. *4)
     var j,               // для прохода по оригиналу
         j1 = 0,          // по изображению с суммами и разницами
         j2 = halfStrLen;
@@ -81,7 +101,7 @@ function compression(quantum, OimgData, DCimgData, ICimgData) { // сжатие 
             j1 += 4;
             j2 += 4;
         }
-        nStr += n / widthPic;
+        nStr += n / heightPic;
     }
     return maxDif;
 }

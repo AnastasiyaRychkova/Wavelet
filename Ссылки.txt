@@ -1,0 +1,3 @@
+https://mdn.mozillademos.org/files/3699/crossbrowser_image_preview.html
+https://mdn.mozillademos.org/files/3698/image_upload_preview.html
+https://developer.mozilla.org/ru/docs/Web/API/File/Using_files_from_web_applications
