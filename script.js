@@ -130,11 +130,12 @@ function compression(quantum, OimgData, DCimgData, ICimgData) { // сжатие 
 }
 
 function setColorsInSegment(s, e, channel, color, ColorGetValue, clrS, clrIndex, legendCtx, legendColors) {
-    var addColor = function(color, mass, i) {
+    var addColor = function(color, mass, i, startPos) {
         mass[i] = {
             0: color[0],
             1: color[1],
-            2: color[2]
+            2: color[2],
+            3: startPos
         }
     }
     var step = (e - s) / clrS;
@@ -145,7 +146,7 @@ function setColorsInSegment(s, e, channel, color, ColorGetValue, clrS, clrIndex,
 
     while(i <= clrS) {
         color[channel] = ColorGetValue(i, clrS); // увеличить значение для данного цветового канала
-        addColor(color, legendColors, clrIndex++); // добавить полученный цвет в массив
+        addColor(color, legendColors, clrIndex++, sS); // добавить полученный цвет в массив
         legendCtx.fillStyle = "rgba("+color[0]+","+color[1]+","+color[2]+")"; // назначить полученный цвет для заливки
         legendCtx.fillRect(0, sS, 10, eS - sS + 1); // закрасить кусочек на легенде
 
@@ -155,12 +156,47 @@ function setColorsInSegment(s, e, channel, color, ColorGetValue, clrS, clrIndex,
     }
 }
 
+function setLegendLabels(iteration, legendHeight, legendColors) {
+    var box = document.getElementById("legendBox"+iteration);
+    var ins;
+    if(legendHeight < 80) {
+        ins = document.createElement("div");
+        ins.className = "inscription";
+        ins.style.top = "0";
+        ins.appendChild(document.createTextNode("0 - "+legendColors.length - 1));
+        box.appendChild(ins);
+        return;
+    }
+
+    var colorN = legendColors.length,
+        step   = Math.ceil(40 / (legendHeight / colorN)),
+        iterations = Math.ceil(colorN / step) - 1,
+        x = 0;
+
+    for (var i = 0; i < iterations; i++) {
+        ins = document.createElement("div");
+        ins.className = "inscription";
+        ins.style.top = legendColors[x][3].toString()+"px";
+        console.log(legendColors[x][3]);
+        ins.appendChild(document.createTextNode(x));
+        box.appendChild(ins);
+        x += step;
+    }
+    x = colorN - 1;
+    ins = document.createElement("div");
+    ins.className = "inscription";
+    ins.style.top = legendColors[x][3].toString()+"px";
+    ins.appendChild(document.createTextNode(x));
+    box.appendChild(ins);
+}
+
 function legendException(maxDif, legendCtx, legendHeight, legendColors) {
-    var addColor = function(color, mass, i) {
+    var addColor = function(color, mass, i, startPos) {
         mass[i] = {
             0: color[0],
             1: color[1],
-            2: color[2]
+            2: color[2],
+            3: startPos
         }
     }
     var color = {
@@ -170,34 +206,34 @@ function legendException(maxDif, legendCtx, legendHeight, legendColors) {
     };
     switch (maxDif) {
         case 0:
-            addColor(color, legendColors, 0);
+            addColor(color, legendColors, 0, 0);
             legendCtx.fillStyle = "rgba(255, 100, 100)"; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, 0, 10, legendHeight); // закрасить кусочек на легенде
             break;
         case 1:
             var h2 = Math.floor(legendHeight / 2);
-            addColor(color, legendColors, 0);
+            addColor(color, legendColors, 0, 0);
             legendCtx.fillStyle = "rgba(255, 100, 100)"; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, 0, 10, h2); // закрасить кусочек на легенде
             color[0] = 100;
             color[2] = 255;
-            addColor(color, legendColors, 1);
+            addColor(color, legendColors, 1, h2);
             legendCtx.fillStyle = "rgba(100, 100, 255)"; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, h2, 10, legendHeight - h2); // закрасить кусочек на легенде
             break;
         case 3:
             var h3 = Math.floor(legendHeight / 2);
-            addColor(color, legendColors, 0);
+            addColor(color, legendColors, 0, 0);
             legendCtx.fillStyle = "rgba(255, 100, 100)"; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, 0, 10, h3); // закрасить кусочек на легенде
             color[0] = 100;
             color[1] = 255;
-            addColor(color, legendColors, 1);
+            addColor(color, legendColors, 1, h3);
             legendCtx.fillStyle = "rgba(100, 255, 100)"; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, h3, 10, h3); // закрасить кусочек на легенде
             color[1] = 100;
             color[2] = 255;
-            addColor(color, legendColors, 1);
+            addColor(color, legendColors, 1, h3 * 2);
             legendCtx.fillStyle = "rgba(100, 255, 100)"; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, h3 * 2, 10, legendHeight - h3 * 2); // закрасить кусочек на легенде
 
@@ -268,10 +304,11 @@ function setHeatmapAccordingToLegend(HMimgData, oImgData, ICimgData, legendColor
     }
 }
 
-function getHeatmap(maxDif, HMimgData, oImgData, ICimgData, legendCtx, legendHeight) { // получение тепловой карты
+function getHeatmap(iteration, maxDif, HMimgData, oImgData, ICimgData, legendCtx, legendHeight) { // получение тепловой карты
     var legendColors = new Array(maxDif + 1);
     getLegend(maxDif, legendCtx, legendHeight, legendColors);
     setHeatmapAccordingToLegend(HMimgData, oImgData, ICimgData, legendColors);
+    setLegendLabels(iteration, legendHeight, legendColors);
 }
 
 function conversion(iteration, quantum) { // ф-ия по нажатию кнопки получения сжатого изобр. и тепловой карты
@@ -303,7 +340,8 @@ function conversion(iteration, quantum) { // ф-ия по нажатию кно�
     var HMimgData = context[iteration + 3.0].getImageData(0, 0, widthPic, heightPic),
         legendCtx = legend.getContext("2d");
 
-    getHeatmap(maxDif, 
+    getHeatmap(iteration / 3 + 1,
+               maxDif, 
                HMimgData,
                context[0].getImageData(0, 0, widthPic, heightPic),
                context[iteration + 2.0].getImageData(0, 0, widthPic, heightPic),

@@ -8,50 +8,60 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <form name="uploadForm">
-        <p>
-            <input id="imageInput" type="file" name="myPhoto" style="display:none" onchange="loadImageFile();"><br>
-            <label for="imageInput">Select some files</label>
-        </p>
-    </form>
-    <section id="sectionOriginal">
-        <h2>Original</h2>
-        <canvas id="original"></canvas>
-        <a href="#" id="downloader0" onclick="downloadOriginal()" download="image.png">Download</a>
-        <div class="button">
-            <button onclick="conversion(0, 0)">Conversion1</button>
-        </div>
-    </section>
-    <section id="sectionConversion1">
-        <h2>Rounding = 0</h2>
-        <canvas id="DirectConversion1"></canvas>
-        <canvas id="InvertConversion1"></canvas>
-        <canvas id="heatmap1"></canvas>
-        <canvas id="legend1"></canvas>
-        <a href="#" id="downloader1" onclick="downloadImg(1)" download="image.png">Download</a>
-        <div class="button">
-            <button onclick="conversion(1, 10)">Conversion2</button>
-        </div>    
-    </section>
-    <section id="sectionConversion2">
-        <h2>Rounding = 10</h2>
-        <canvas id="DirectConversion2"></canvas>
-        <canvas id="InvertConversion2"></canvas>
-        <canvas id="heatmap2"></canvas>
-        <canvas id="legend2"></canvas>
-        <a href="#" id="downloader2" onclick="downloadImg(2)" download="image.png">Download</a>
-        <div class="button">
-            <button onclick="conversion(2, 50)">Conversion3</button>
-        </div>    
-    </section>
-    <section id="sectionConversion2">
-        <h2>Rounding = 50</h2>
-        <canvas id="DirectConversion3"></canvas>
-        <canvas id="InvertConversion3"></canvas>
-        <canvas id="heatmap3"></canvas>
-        <canvas id="legend3"></canvas> 
-        <a href="#" id="downloader3" onclick="downloadImg(3)" download="image.png">Download</a>   
-    </section>
+    <div class="center">
+        <form name="uploadForm">
+            <p>
+                <input id="imageInput" type="file" name="myPhoto" style="display:none" onchange="loadImageFile();"><br>
+                <label for="imageInput">Select some files</label>
+            </p>
+        </form>
+        <section id="sectionOriginal">
+            <h2>Original</h2>
+            <canvas id="original"></canvas>
+            <a href="#" id="downloader0" onclick="downloadOriginal()" download="image.png">Download</a>
+            <div class="button">
+                <button onclick="conversion(0, 0)">Conversion1</button>
+            </div>
+        </section>
+        <section id="sectionConversion1">
+            <h2>Rounding = 0</h2>
+            <canvas id="DirectConversion1"></canvas>
+            <canvas id="InvertConversion1"></canvas>
+            <canvas id="heatmap1"></canvas>
+            <div id="legendBox1" class="legendBox">
+                <canvas id="legend1" width="10"></canvas>
+                <!-- <div id="s42" class="inscription">42</div>
+                <div id="s45" class="inscription">45</div> -->
+            </div>
+            <a href="#" id="downloader1" onclick="downloadImg(1)" download="image.png">Download</a>
+            <div class="button">
+                <button onclick="conversion(1, 10)">Conversion2</button>
+            </div>    
+        </section>
+        <section id="sectionConversion2">
+            <h2>Rounding = 10</h2>
+            <canvas id="DirectConversion2"></canvas>
+            <canvas id="InvertConversion2"></canvas>
+            <canvas id="heatmap2"></canvas>
+            <div id="legendBox2" class="legendBox">
+                <canvas id="legend2" width="10"></canvas>
+            </div>
+            <a href="#" id="downloader2" onclick="downloadImg(2)" download="image.png">Download</a>
+            <div class="button">
+                <button onclick="conversion(2, 50)">Conversion3</button>
+            </div>    
+        </section>
+        <section id="sectionConversion2">
+            <h2>Rounding = 50</h2>
+            <canvas id="DirectConversion3"></canvas>
+            <canvas id="InvertConversion3"></canvas>
+            <canvas id="heatmap3"></canvas>
+            <div id="legendBox3" class="legendBox">
+                <canvas id="legend3" width="10"></canvas>
+            </div> 
+            <a href="#" id="downloader3" onclick="downloadImg(3)" download="image.png">Download</a>   
+        </section>
+    </div>
 </body>
 <script src="script.js"></script>
 </html> 

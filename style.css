@@ -5,3 +5,30 @@ canvas {
 section {
     margin-bottom: 20px;
 }
+.legendBox {
+    display: inline-block;
+    position: relative;
+    border: 1px solid red;
+}
+
+.inscription {
+    display: inline-block;
+    position: absolute;
+    left: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+    width: 25px;
+    text-align: right;
+    height: 10px;
+    padding-right: 3px;
+    border-top: 1px solid blue;
+    border-right: 1px solid blue;
+}
+
+#s45 {
+    top: 0px;
+}
+
+#s42 {
+    top: 200px;
+}
