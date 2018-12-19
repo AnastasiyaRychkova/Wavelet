@@ -34,7 +34,8 @@ var loadImageFile = (function () {
                     getCtx("InvertConversion" + i, (i - 1) * 3 + 2);   // обратное преобразование картинки
                     getCtx("heatmap" + i, (i - 1) * 3 + 3);            // тепловая карта исходника и сжатногго изображения
                 }
-                context[0].drawImage(pic, 0, 0, widthPic, heightPic);
+                context[0].drawImage(pic, 0, 0, widthPic, heightPic, 0, 0, widthPic, heightPic);
+                getGreyImages(context[0]);
             }
 		};
 
@@ -57,6 +58,28 @@ var loadImageFile = (function () {
 function downloadImg(num){
     document.getElementById("downloader"+num).download = "123.png";
     document.getElementById("downloader"+num).href = document.getElementById("InvertConversion"+num).toDataURL("image/png").replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+}
+
+function downloadOriginal() {
+    document.getElementById("downloader0").download = "123.png";
+    document.getElementById("downloader0").href = document.getElementById("original").toDataURL("image/png").replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+}
+
+function getGreyImages(ctx) {
+    
+    var colorToGrey = function(red, green, blue) {
+        return Math.round(red * 0.2126 + green * 0.7152 + blue * 0.0722);
+    }
+    var imgData = ctx.getImageData(0, 0, widthPic, heightPic);
+    var pixColor;
+
+    for (var i=0; i<imgData.data.length; i+=4) {
+        pixColor = colorToGrey(imgData.data[i], imgData.data[i+1], imgData.data[i+2]);
+        imgData.data[i] = pixColor;
+        imgData.data[i+1] = pixColor;
+        imgData.data[i+2] = pixColor;
+    }
+    ctx.putImageData(imgData, 0, 0);
 }
 
 function setPixel(imageData, i, value) { // установка значения value в пиксель, начиная с индекса i
