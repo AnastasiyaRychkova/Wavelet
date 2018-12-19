@@ -5,17 +5,12 @@ var context = {};
 
 function reset() {
     var sections = document.getElementsByTagName('section');
-    // var inscriptions = document.getElementsByClassName('inscription'),
-    //     insLen = inscriptions.length;
     for (i = 1; i < 4; i++) {
         sections[i].style.display = 'none';
     }
     removeAllLegendLabels(document);
-    // if (inscriptions[0] != null) {
-    //     for (i = insLen - 1; i >= 0; i--) {
-    //         inscriptions[i].remove();
-    //     }    
-    // }
+    document.getElementById('trackBar').value = 50;
+    document.getElementById('settingRoundingH2').innerHTML = 'Rounding: 50px';
 }
 
 function removeAllLegendLabels(elem) {
@@ -52,9 +47,11 @@ var loadImageFile = (function () {
         }
         pic.src = oFREvent.target.result;
         pic.onload = function () {
-            widthPic = (pic.width < 499) ? pic.width % 2 ? pic.width - 1 // по-тихому меняет размеры изображения,
+            var aWidth = document.body.clientWidth - 60;
+            console.log(aWidth);
+            widthPic = (pic.width < aWidth - 1) ? pic.width % 2 ? pic.width - 1 // по-тихому меняет размеры изображения,
                                                             : pic.width     // чтобы они были четными
-                                            : 500;
+                                            : aWidth;
             heightPic = pic.height;
 
             reset();
@@ -183,6 +180,9 @@ function setColorsInSegment(s, e, channel, color, ColorGetValue, clrS, clrIndex,
         legendCtx.fillRect(0, sS, 10, eS - sS + 1); // закрасить кусочек на легенде
         i++;
     }
+    if (e != eS) { // если произошла ошибка округления
+        legendCtx.fillRect(0, eS + 1, 10, e - eS); // закрасить кусочек на легенде
+    }
 }
 
 function setLegendLabels(iteration, legendHeight, legendColors) {
@@ -273,14 +273,14 @@ function getLegend(maxDif, legendCtx, legendHeight, legendColors) {
         legendException(maxDif, legendCtx, legendHeight, legendColors);
         return;
     }
-    var h4 = (legendHeight - 1) / 4,
+    var colorN = maxDif + 1,
         clr4 = (maxDif + 1) / 4;
     var i = 1,
-        s = 0, // начало сегмента
-        e = Math.floor(h4), // конец сегмента
         channel = 1, // green
         clrS = Math.floor(clr4 * i), // кол-во цветов задаваемых данным сегментом
-        clrR = 0; // кол-во заданных цветов
+        clrR = 0, // кол-во заданных цветов
+        s = 0, // начало сегмента
+        e = Math.floor((clrS + clrR) / colorN * legendHeight); // конец сегмента
 
     var incColorGetValue = function(n, per) {
         return Math.round(155 * n / per) + 100;
@@ -308,11 +308,11 @@ function getLegend(maxDif, legendCtx, legendHeight, legendColors) {
                            legendColors);
         color[channel] = i % 2 ? 255 : 100;
         i++;
-        s = e + 1;
-        e = Math.floor(h4 * i);
         channel = (channel + 2) % 3;
         clrR += clrS;
         clrS = Math.floor(clr4 * i) - clrR;
+        s = e + 1;
+        e = Math.floor((clrS + clrR) / colorN * legendHeight);
         color[channel] = i % 2 ? incColorGetValue(1, clrS)
                                : decColorGetValue(1, clrS); // увеличить значение для данного цветового канала
     }
