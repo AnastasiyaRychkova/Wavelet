@@ -24,7 +24,7 @@
             </div>
         </section>
         <section id="sectionConversion1">
-            <h2>Rounding = 0</h2>
+            <h2>Rounding: 0px</h2>
             <canvas id="DirectConversion1"></canvas>
             <canvas id="InvertConversion1"></canvas>
             <canvas id="heatmap1"></canvas>
@@ -39,7 +39,7 @@
             </div>    
         </section>
         <section id="sectionConversion2">
-            <h2>Rounding = 10</h2>
+            <h2>Rounding: 10px</h2>
             <canvas id="DirectConversion2"></canvas>
             <canvas id="InvertConversion2"></canvas>
             <canvas id="heatmap2"></canvas>
@@ -52,7 +52,10 @@
             </div>    
         </section>
         <section id="sectionConversion3">
-            <h2>Rounding = 50</h2>
+            <h2 id="settingRoundingH2">Rounding: 50px</h2>
+            <div class="range">
+                    <input type="range" id="trackBar" onchange="onChangeTrackBar()" min="0" max="255" value="50" style="width: 500px;">
+                  </div>
             <canvas id="DirectConversion3"></canvas>
             <canvas id="InvertConversion3"></canvas>
             <canvas id="heatmap3"></canvas>

@@ -4,12 +4,23 @@ var widthPic = 200,
 var context = {};
 
 function reset() {
-    var sections = document.getElementsByTagName("section");
-    var inscriptions = document.getElementsByClassName("inscription"),
-        insLen = inscriptions.length;
+    var sections = document.getElementsByTagName('section');
+    // var inscriptions = document.getElementsByClassName('inscription'),
+    //     insLen = inscriptions.length;
     for (i = 1; i < 4; i++) {
-        sections[i].style.display = "none";
+        sections[i].style.display = 'none';
     }
+    removeAllLegendLabels(document);
+    // if (inscriptions[0] != null) {
+    //     for (i = insLen - 1; i >= 0; i--) {
+    //         inscriptions[i].remove();
+    //     }    
+    // }
+}
+
+function removeAllLegendLabels(elem) {
+    var inscriptions = elem.getElementsByClassName('inscription'),
+        insLen = inscriptions.length;
     if (inscriptions[0] != null) {
         for (i = insLen - 1; i >= 0; i--) {
             inscriptions[i].remove();
@@ -18,16 +29,16 @@ function reset() {
 }
 
 window.onload = function() {
-    document.getElementById("sectionOriginal").style.display = "none";
+    document.getElementById('sectionOriginal').style.display = 'none';
     reset();
 }
 
 function getCtx(nameId, num) {
     var elem = document.getElementById(nameId);
-    elem.setAttributeNS(null, "width", widthPic);
-    elem.setAttributeNS(null, "height", heightPic);
+    elem.setAttributeNS(null, 'width', widthPic);
+    elem.setAttributeNS(null, 'height', heightPic);
 
-    context[num] = elem.getContext("2d");
+    context[num] = elem.getContext('2d');
 }
 
 var loadImageFile = (function () {
@@ -37,7 +48,7 @@ var loadImageFile = (function () {
     oFReader.onload = function (oFREvent) {
         if (!pic) {
             pic = new Image();
-            document.getElementById("sectionOriginal").style.display = "block";
+            document.getElementById('sectionOriginal').style.display = 'block';
         }
         pic.src = oFREvent.target.result;
         pic.onload = function () {
@@ -49,12 +60,12 @@ var loadImageFile = (function () {
             reset();
 
             // установка размеров канвас в зависимости от размеров картинки 
-            getCtx("original", 0);                 // получение контекста всех канвасов на странице
+            getCtx('original', 0);                 // получение контекста всех канвасов на странице
             var i;
             for (i = 1; i < 4; i++) {
-                getCtx("DirectConversion" + i, (i - 1) * 3 + 1);   // канвас, отображающий суммы и разности после квантования
-                getCtx("InvertConversion" + i, (i - 1) * 3 + 2);   // обратное преобразование картинки
-                getCtx("heatmap" + i, (i - 1) * 3 + 3);            // тепловая карта исходника и сжатногго изображения
+                getCtx('DirectConversion' + i, (i - 1) * 3 + 1);   // канвас, отображающий суммы и разности после квантования
+                getCtx('InvertConversion' + i, (i - 1) * 3 + 2);   // обратное преобразование картинки
+                getCtx('heatmap' + i, (i - 1) * 3 + 3);            // тепловая карта исходника и сжатногго изображения
             }
             context[0].drawImage(pic, 0, 0, widthPic, heightPic, 0, 0, widthPic, heightPic);
             getGreyImages(context[0]);
@@ -62,21 +73,21 @@ var loadImageFile = (function () {
     };
 
     return function () {
-        var aFiles = document.getElementById("imageInput").files;
+        var aFiles = document.getElementById('imageInput').files;
         if (aFiles.length === 0) { return; }
-        if (!rFilter.test(aFiles[0].type)) { alert("You must select a valid image file!"); return; }
+        if (!rFilter.test(aFiles[0].type)) { alert('You must select a valid image file!'); return; }
         oFReader.readAsDataURL(aFiles[0]);
     }
 })();
 
 function downloadImg(num){
-    document.getElementById("downloader"+num).download = "123.png";
-    document.getElementById("downloader"+num).href = document.getElementById("InvertConversion"+num).toDataURL("image/png").replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+    document.getElementById('downloader'+num).download = '123.png';
+    document.getElementById('downloader'+num).href = document.getElementById('InvertConversion'+num).toDataURL('image/png').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 }
 
 function downloadOriginal() {
-    document.getElementById("downloader0").download = "123.png";
-    document.getElementById("downloader0").href = document.getElementById("original").toDataURL("image/png").replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+    document.getElementById('downloader0').download = '123.png';
+    document.getElementById('downloader0').href = document.getElementById('original').toDataURL('image/png').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 }
 
 function getGreyImages(ctx) {
@@ -158,26 +169,30 @@ function setColorsInSegment(s, e, channel, color, ColorGetValue, clrS, clrIndex,
         sS = s, // кондинаты начала цвета
         eS = Math.floor(i * step) + s; // координаты конца
 
+    addColor(color, legendColors, clrIndex++, sS);
+    legendCtx.fillStyle = 'rgba('+color[0]+','+color[1]+','+color[2]+')'; // назначить полученный цвет для заливки
+    legendCtx.fillRect(0, sS, 10, eS - sS + 1); // закрасить кусочек на легенде
+    i++;
     while(i <= clrS) {
-        color[channel] = ColorGetValue(i, clrS); // увеличить значение для данного цветового канала
-        addColor(color, legendColors, clrIndex++, sS); // добавить полученный цвет в массив
-        legendCtx.fillStyle = "rgba("+color[0]+","+color[1]+","+color[2]+")"; // назначить полученный цвет для заливки
-        legendCtx.fillRect(0, sS, 10, eS - sS + 1); // закрасить кусочек на легенде
-
-        i++;
         sS = eS + 1;
         eS = Math.floor(i * step) + s;
+
+        color[channel] = ColorGetValue(i, clrS); // увеличить значение для данного цветового канала
+        addColor(color, legendColors, clrIndex++, sS); // добавить полученный цвет в массив
+        legendCtx.fillStyle = 'rgba('+color[0]+','+color[1]+','+color[2]+')'; // назначить полученный цвет для заливки
+        legendCtx.fillRect(0, sS, 10, eS - sS + 1); // закрасить кусочек на легенде
+        i++;
     }
 }
 
 function setLegendLabels(iteration, legendHeight, legendColors) {
-    var box = document.getElementById("legendBox"+iteration);
+    var box = document.getElementById('legendBox'+iteration);
     var ins;
     if(legendHeight < 80) {
-        ins = document.createElement("div");
-        ins.className = "inscription";
-        ins.style.top = "0";
-        ins.appendChild(document.createTextNode("0 - "+legendColors.length - 1));
+        ins = document.createElement('div');
+        ins.className = 'inscription';
+        ins.style.top = '0';
+        ins.appendChild(document.createTextNode('0 - '+legendColors.length - 1));
         box.appendChild(ins);
         return;
     }
@@ -188,17 +203,17 @@ function setLegendLabels(iteration, legendHeight, legendColors) {
         x = 0;
 
     for (var i = 0; i < iterations; i++) {
-        ins = document.createElement("div");
-        ins.className = "inscription";
-        ins.style.top = legendColors[x][3].toString()+"px";
+        ins = document.createElement('div');
+        ins.className = 'inscription';
+        ins.style.top = legendColors[x][3].toString()+'px';
         ins.appendChild(document.createTextNode(x));
         box.appendChild(ins);
         x += step;
     }
     x = colorN - 1;
-    ins = document.createElement("div");
-    ins.className = "inscription";
-    ins.style.top = legendColors[x][3].toString()+"px";
+    ins = document.createElement('div');
+    ins.className = 'inscription';
+    ins.style.top = legendColors[x][3].toString()+'px';
     ins.appendChild(document.createTextNode(x));
     box.appendChild(ins);
 }
@@ -220,41 +235,41 @@ function legendException(maxDif, legendCtx, legendHeight, legendColors) {
     switch (maxDif) {
         case 0:
             addColor(color, legendColors, 0, 0);
-            legendCtx.fillStyle = "rgba(255, 100, 100)"; // назначить полученный цвет для заливки
+            legendCtx.fillStyle = 'rgba(255, 100, 100)'; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, 0, 10, legendHeight); // закрасить кусочек на легенде
             break;
         case 1:
             var h2 = Math.floor(legendHeight / 2);
             addColor(color, legendColors, 0, 0);
-            legendCtx.fillStyle = "rgba(255, 100, 100)"; // назначить полученный цвет для заливки
+            legendCtx.fillStyle = 'rgba(255, 100, 100)'; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, 0, 10, h2); // закрасить кусочек на легенде
             color[0] = 100;
             color[2] = 255;
             addColor(color, legendColors, 1, h2);
-            legendCtx.fillStyle = "rgba(100, 100, 255)"; // назначить полученный цвет для заливки
+            legendCtx.fillStyle = 'rgba(100, 100, 255)'; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, h2, 10, legendHeight - h2); // закрасить кусочек на легенде
             break;
-        case 3:
-            var h3 = Math.floor(legendHeight / 2);
+        case 2:
+            var h3 = Math.floor(legendHeight / 3);
             addColor(color, legendColors, 0, 0);
-            legendCtx.fillStyle = "rgba(255, 100, 100)"; // назначить полученный цвет для заливки
+            legendCtx.fillStyle = 'rgba(255, 100, 100)'; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, 0, 10, h3); // закрасить кусочек на легенде
             color[0] = 100;
             color[1] = 255;
             addColor(color, legendColors, 1, h3);
-            legendCtx.fillStyle = "rgba(100, 255, 100)"; // назначить полученный цвет для заливки
+            legendCtx.fillStyle = 'rgba(100, 255, 100)'; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, h3, 10, h3); // закрасить кусочек на легенде
             color[1] = 100;
             color[2] = 255;
-            addColor(color, legendColors, 1, h3 * 2);
-            legendCtx.fillStyle = "rgba(100, 255, 100)"; // назначить полученный цвет для заливки
+            addColor(color, legendColors, 2, h3 * 2);
+            legendCtx.fillStyle = 'rgba(100, 100, 255)'; // назначить полученный цвет для заливки
             legendCtx.fillRect(0, h3 * 2, 10, legendHeight - h3 * 2); // закрасить кусочек на легенде
 
     }
 }
 
 function getLegend(maxDif, legendCtx, legendHeight, legendColors) {
-    if (maxDif < 4) {
+    if (maxDif < 3) {
         legendException(maxDif, legendCtx, legendHeight, legendColors);
         return;
     }
@@ -291,12 +306,15 @@ function getLegend(maxDif, legendCtx, legendHeight, legendColors) {
                            clrR,
                            legendCtx,
                            legendColors);
+        color[channel] = i % 2 ? 255 : 100;
         i++;
         s = e + 1;
         e = Math.floor(h4 * i);
+        channel = (channel + 2) % 3;
         clrR += clrS;
         clrS = Math.floor(clr4 * i) - clrR;
-        channel = (channel + 2) % 3;
+        color[channel] = i % 2 ? incColorGetValue(1, clrS)
+                               : decColorGetValue(1, clrS); // увеличить значение для данного цветового канала
     }
 }
 
@@ -324,13 +342,21 @@ function getHeatmap(iteration, maxDif, HMimgData, oImgData, ICimgData, legendCtx
     setLegendLabels(iteration, legendHeight, legendColors);
 }
 
+function onChangeTrackBar() 
+{
+    var quantum = parseInt(document.getElementById('trackBar').value);
+    document.getElementById('settingRoundingH2').innerHTML = 'Rounding: '+quantum+'px';
+    removeAllLegendLabels(document.getElementById('legendBox3'));
+    conversion(2, quantum);
+}
+
 function conversion(iteration, quantum) { // ф-ия по нажатию кнопки получения сжатого изобр. и тепловой карты
     iteration *= 3;
     if (   !context[0] // проверка, есть ли все контексты в массиве
         || !context[iteration + 1.0] 
         || !context[iteration + 2.0] 
         || !context[iteration + 3.0] ) { // если чего-то нет, вывод сообщения об ошибке в консоль
-            console.log("Have no context", 0, iteration + 1, iteration + 2, iteration + 3);
+            console.log('Have no context', 0, iteration + 1, iteration + 2, iteration + 3);
             return;
     }
     
@@ -344,14 +370,14 @@ function conversion(iteration, quantum) { // ф-ия по нажатию кно�
     context[iteration + 1.0].putImageData(DCimgData, 0, 0);
     context[iteration + 2.0].putImageData(ICimgData, 0, 0);
 
-    var legend = document.getElementById("legend"+(iteration / 3 + 1));
+    var legend = document.getElementById('legend'+(iteration / 3 + 1));
     var legendHeight = heightPic < maxDif ? maxDif 
                                           : heightPic;
-    legend.setAttributeNS(null, "width", "10");
-    legend.setAttributeNS(null, "height", legendHeight.toString());
+    legend.setAttributeNS(null, 'width', '10');
+    legend.setAttributeNS(null, 'height', legendHeight.toString());
 
     var HMimgData = context[iteration + 3.0].getImageData(0, 0, widthPic, heightPic),
-        legendCtx = legend.getContext("2d");
+        legendCtx = legend.getContext('2d');
 
     getHeatmap(iteration / 3 + 1,
                maxDif, 
@@ -361,6 +387,6 @@ function conversion(iteration, quantum) { // ф-ия по нажатию кно�
                legendCtx,
                legendHeight);
     context[iteration + 3.0].putImageData(HMimgData, 0, 0);
-    console.log("sectionConversion"+(iteration / 3 + 1));
-    document.getElementById("sectionConversion"+(iteration / 3 + 1)).style.display = "block";
+    console.log('sectionConversion'+(iteration / 3 + 1));
+    document.getElementById('sectionConversion'+(iteration / 3 + 1)).style.display = 'block';
 }
