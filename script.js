@@ -3,6 +3,25 @@ var widthPic = 200,
     heightPic = 400;
 var context = {};
 
+function reset() {
+    var sections = document.getElementsByTagName("section");
+    var inscriptions = document.getElementsByClassName("inscription"),
+        insLen = inscriptions.length;
+    for (i = 1; i < 4; i++) {
+        sections[i].style.display = "none";
+    }
+    if (inscriptions[0] != null) {
+        for (i = insLen - 1; i >= 0; i--) {
+            inscriptions[i].remove();
+        }    
+    }
+}
+
+window.onload = function() {
+    document.getElementById("sectionOriginal").style.display = "none";
+    reset();
+}
+
 function getCtx(nameId, num) {
     var elem = document.getElementById(nameId);
     elem.setAttributeNS(null, "width", widthPic);
@@ -12,46 +31,41 @@ function getCtx(nameId, num) {
 }
 
 var loadImageFile = (function () {
-	if (window.FileReader) {
-		var	pic = null, oFReader = new window.FileReader(),
-			rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
+    var	pic = null, oFReader = new window.FileReader(),
+        rFilter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
 
-		oFReader.onload = function (oFREvent) {
-			if (!pic) {
-				pic = new Image();
-			}
-            pic.src = oFREvent.target.result;
-            pic.onload = function () {
-                widthPic = (pic.width < 499) ? pic.width % 2 ? pic.width - 1 // по-тихому меняет размеры изображения,
-                                                             : pic.width     // чтобы они были четными
-                                             : 500;
-                heightPic = pic.height;
+    oFReader.onload = function (oFREvent) {
+        if (!pic) {
+            pic = new Image();
+            document.getElementById("sectionOriginal").style.display = "block";
+        }
+        pic.src = oFREvent.target.result;
+        pic.onload = function () {
+            widthPic = (pic.width < 499) ? pic.width % 2 ? pic.width - 1 // по-тихому меняет размеры изображения,
+                                                            : pic.width     // чтобы они были четными
+                                            : 500;
+            heightPic = pic.height;
 
-                // установка размеров канвас в зависимости от размеров картинки 
-                getCtx("original", 0);                 // получение контекста всех канвасов на странице
-                for (var i = 1; i < 4; i++) {
-                    getCtx("DirectConversion" + i, (i - 1) * 3 + 1);   // канвас, отображающий суммы и разности после квантования
-                    getCtx("InvertConversion" + i, (i - 1) * 3 + 2);   // обратное преобразование картинки
-                    getCtx("heatmap" + i, (i - 1) * 3 + 3);            // тепловая карта исходника и сжатногго изображения
-                }
-                context[0].drawImage(pic, 0, 0, widthPic, heightPic, 0, 0, widthPic, heightPic);
-                getGreyImages(context[0]);
+            reset();
+
+            // установка размеров канвас в зависимости от размеров картинки 
+            getCtx("original", 0);                 // получение контекста всех канвасов на странице
+            var i;
+            for (i = 1; i < 4; i++) {
+                getCtx("DirectConversion" + i, (i - 1) * 3 + 1);   // канвас, отображающий суммы и разности после квантования
+                getCtx("InvertConversion" + i, (i - 1) * 3 + 2);   // обратное преобразование картинки
+                getCtx("heatmap" + i, (i - 1) * 3 + 3);            // тепловая карта исходника и сжатногго изображения
             }
-		};
+            context[0].drawImage(pic, 0, 0, widthPic, heightPic, 0, 0, widthPic, heightPic);
+            getGreyImages(context[0]);
+        }
+    };
 
-		return function () {
-			var aFiles = document.getElementById("imageInput").files;
-			if (aFiles.length === 0) { return; }
-			if (!rFilter.test(aFiles[0].type)) { alert("You must select a valid image file!"); return; }
-			oFReader.readAsDataURL(aFiles[0]);
-		}
-
-	}
-	if (navigator.appName === "Microsoft Internet Explorer") {
-		return function () {
-			document.getElementById("imagePreview").filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = document.getElementById("imageInput").value;
-
-		}
+    return function () {
+        var aFiles = document.getElementById("imageInput").files;
+        if (aFiles.length === 0) { return; }
+        if (!rFilter.test(aFiles[0].type)) { alert("You must select a valid image file!"); return; }
+        oFReader.readAsDataURL(aFiles[0]);
     }
 })();
 
@@ -177,7 +191,6 @@ function setLegendLabels(iteration, legendHeight, legendColors) {
         ins = document.createElement("div");
         ins.className = "inscription";
         ins.style.top = legendColors[x][3].toString()+"px";
-        console.log(legendColors[x][3]);
         ins.appendChild(document.createTextNode(x));
         box.appendChild(ins);
         x += step;
@@ -348,4 +361,6 @@ function conversion(iteration, quantum) { // ф-ия по нажатию кно�
                legendCtx,
                legendHeight);
     context[iteration + 3.0].putImageData(HMimgData, 0, 0);
+    console.log("sectionConversion"+(iteration / 3 + 1));
+    document.getElementById("sectionConversion"+(iteration / 3 + 1)).style.display = "block";
 }
